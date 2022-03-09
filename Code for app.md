@@ -350,6 +350,7 @@ Clock4.place(x=200, y=440)
 Timeelapse = Label(window, text="Sim run time")
 Timeelapse.place(x=280, y=440)
 
+
 def Stop():
     running.set(0)
 
@@ -362,7 +363,7 @@ def Start_time():
     hourfloat = float(hour)
     minutefloat = float(minute)
     secondfloat = float(second)
-    milliseconds2 = (((milliseconds) - (millisecondsint)).__round__(3))
+    milliseconds2 = ((milliseconds) - (millisecondsint))
     floattime = ((hourfloat * 3600) + (minutefloat * 60) + secondfloat + milliseconds2)
     T_start.set (floattime)
 
@@ -375,7 +376,7 @@ def Stop_time():
     hourfloat = float(hour)
     minutefloat = float(minute)
     secondfloat = float(second)
-    milliseconds2 = (((milliseconds)-(millisecondsint)).__round__(3))
+    milliseconds2 = ((milliseconds)-(millisecondsint))
     floattime = ((hourfloat * 3600) + (minutefloat * 60) + secondfloat + milliseconds2)
     T_stop.set (floattime)
     Time_elapsed = (( T_stop.get() - T_start.get() ).__round__(3))
@@ -394,32 +395,32 @@ def Precharge():
         canvas.move(Fluid,0.1,0)
         window.update()
 
-
 def Compress():
     running.set(1)
     ExpandButton.config(state=NORMAL)
     Start_time()
+    Timetomove_Compress = (Entry3.get() - Entry4.get()) / Flow1.get()
     while running.get() == 1:
         coordinates = canvas.coords(Piston)
         PISTONLIMIT = (Entry4.get() / Entry3.get()) * CanvasWidth
         if coordinates[0] <= PISTONLIMIT:
             Stop()
             Stop_time()
-        canvas.move(Piston,[(Flow1.get()*(-1))*0.08],0)
-        canvas.move(Fluid,[(Flow1.get()*(-1))*0.08],0)
+        canvas.move(Piston,[(Flow1.get()*(-1))/220],0)
+        canvas.move(Fluid,[(Flow1.get()*(-1))/220],0)
         window.update()
-
 
 def Discharge():
     running.set(1)
     Start_time()
+    Timetomove_Expand = (Entry3.get() - Entry4.get()) / Flow2.get()
     while running.get() == 1:
         coordinates = canvas.coords(Piston)
         if coordinates[0] >= 355:
             Stop()
             Stop_time()
-        canvas.move(Piston,[Flow2.get()*0.08],0)
-        canvas.move(Fluid,[Flow2.get()*0.08],0)
+        canvas.move(Piston,[Flow2.get()/220],0)
+        canvas.move(Fluid,[Flow2.get()/220],0)
         window.update()
 
 window.mainloop()

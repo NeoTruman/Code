@@ -422,7 +422,4 @@ def Discharge():
         canvas.move(Fluid,[Flow2.get()*0.08],0)
         window.update()
 
-window.mainloop()  # place window on computer screen
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+window.mainloop()

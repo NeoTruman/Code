@@ -1,7 +1,5 @@
-import tkinter
 from tkinter import *
 import time
-import math
 
 window = Tk()  # creates window
 window.geometry("650x500")
@@ -12,33 +10,60 @@ icon = PhotoImage(file='logo.png')
 window.iconphoto(True, icon)
 window.config(background="white")
 
-menubar = Menu(window)
-filemenu = Menu(menubar, tearoff=0)
-menubar.add_cascade(label="File", menu=filemenu)
-filemenu.add_command(label="New")
-filemenu.add_command(label="Open")
-filemenu.add_command(label="Save")
-filemenu.add_separator()
-filemenu.add_command(label="Exit", command=quit)
 
-editmenu = Menu(menubar, tearoff=0)
-menubar.add_cascade(label="Edit", menu=editmenu)
-editmenu.add_command(label="Copy")
-editmenu.add_command(label="Paste")
-editmenu.add_command(label="Woo!")
+def count():
+    hour = time.strftime("%I")
+    minute = time.strftime("%M")
+    second = time.strftime("%S")
+    timelabel = Label(window, fg='green', font=('Arial', 10), text="New Text")
+    timelabel.place(x=10, y=410)
+    timelabel.config(text=hour + ":" + minute + ":" + second)
+    timelabel.after(100, count)
 
-window.config(menu=menubar)
 
-def Count():
-        hour = time.strftime("%I")
-        minute = time.strftime("%M")
-        second = time.strftime("%S")
-        timelabel = Label(window, fg='green', font=('Arial', 10), text="New Text")
-        timelabel.place(x=10, y=410)
-        timelabel.config(text=hour + ":" + minute + ":" + second)
-        timelabel.after(100,Count)
+count()
 
-Count()
+T_global = DoubleVar()
+
+
+def count2():
+    hour = time.strftime("%I")
+    minute = time.strftime("%M")
+    second = time.strftime("%S")
+    milliseconds = (time.time() * 1000)
+    millisecondsint = int(milliseconds)
+    hourfloat = float(hour)
+    minutefloat = float(minute)
+    secondfloat = float(second)
+    milliseconds2 = milliseconds - millisecondsint
+    floattime3 = ((hourfloat * 3600) + (minutefloat * 60) + secondfloat + milliseconds2).__round__(3)
+    timelabel3 = Label(window, fg='green', font=('Arial', 10), text=floattime3)
+    timelabel3.place(x=250, y=550)
+    timelabel3.after(100, count2)
+    T_global.set(floattime3)
+
+
+count2()
+
+runtime = DoubleVar()
+
+T_start = DoubleVar()
+
+T_elapse = DoubleVar()
+
+running = IntVar()
+
+
+def timer():
+    timertime = ((T_global.get() - T_start.get()).__round__(3))
+    timelabel3 = Label(window, fg='green', font=('Arial', 10), text=timertime)
+    timelabel3.place(x=250, y=560)
+    timelabel3.after(100, timer)
+    if running.get() == 1:
+        T_elapse.set(timertime)
+
+
+timer()
 
 P1 = IntVar()
 
@@ -146,7 +171,7 @@ Entry4 = DoubleVar()
 Entry5 = DoubleVar()
 
 entry1 = Entry(window, textvariable=Entry1)
-entry1.insert(0,'0')
+entry1.insert(0, '0')
 entry1.config(state=DISABLED)
 entry1.place(x=400, y=10)
 
@@ -271,31 +296,32 @@ flow2.place(x=400, y=420)
 Sec2 = Label(window, text="Flow rate LPM")
 Sec2.place(x=530, y=420)
 
-PrechargeButton = Button(window, command=lambda: [Precharge()], text='Precharge')
+PrechargeButton = Button(window, command=lambda: [Precharge(), timer()], text='Precharge')
 PrechargeButton.config(state=DISABLED)
 PrechargeButton.place(x=400, y=310)
 
-ExpandButton = Button(window, command=lambda: [Discharge()], text='Expand/Discharge')
+ExpandButton = Button(window, command=lambda: [Discharge(), timer()], text='Expand/Discharge')
 ExpandButton.config(state=DISABLED)
 ExpandButton.place(x=400, y=445)
 
-CompressButton = Button(window, command=lambda: [Compress()], text='Compress/Fill')
+CompressButton = Button(window, command=lambda: [Compress(), timer()], text='Compress/Fill')
 CompressButton.config(state=DISABLED)
 CompressButton.place(x=400, y=375)
 
-running = IntVar()
-
-run1 = Checkbutton(window, text='Accu sim on/off', variable=running, onvalue=1, offvalue=0)
+run1 = Checkbutton(window, text='Accu sim armed', variable=running, onvalue=1, offvalue=0)
 run1.place(x=10, y=340)
 
-SimButton = Button(window, command=lambda: [SimAct(), SimOff()], text='Activate/Deactivate')
+SimButton = Button(window, command=lambda: [SimAct(), SimOff()], text='Ready')
 SimButton.place(x=10, y=370)
+
 
 def SimAct():
     if running.get() == 1:
         flow1.config(state=NORMAL)
         flow2.config(state=NORMAL)
         PrechargeButton.config(state=NORMAL)
+        Armed.config(text="Sim ready", fg='green')
+
 
 def SimOff():
     if running.get() == 0:
@@ -304,6 +330,8 @@ def SimOff():
         CompressButton.config(state=DISABLED)
         ExpandButton.config(state=DISABLED)
         PrechargeButton.config(state=DISABLED)
+        Armed.config(text="Sim off", fg='red')
+
 
 canvas = Canvas(window, bg="White", highlightthickness=1, highlightbackground="black", height=60, width=375)
 canvas.config(bg="light blue")
@@ -315,15 +343,11 @@ PistonWidth = 20
 Piston = canvas.create_rectangle(20, 1, 0, 60, fill='green')
 Fluid = canvas.create_rectangle(20, 1, 400, 60, fill='violet')
 
-SpeedFactor: float = Flow1.get()* 5.63  #unit conversion
+timeref = Label(window, text="Clock")
+timeref.place(x=100, y=410)
 
-Timeref = Label(window, text="Global reference time")
-Timeref.place(x=100, y=410)
-
-T_start = DoubleVar()
-
-Clock2=Entry(window, textvariable=T_start)
-Clock2.insert(0,'0')
+Clock2 = Entry(window, textvariable=T_start)
+Clock2.insert(0, '0')
 Clock2.config(state=DISABLED)
 Clock2.place(x=10, y=440)
 
@@ -332,95 +356,114 @@ Timestart.place(x=100, y=440)
 
 T_stop = DoubleVar()
 
-Clock3=Entry(window, textvariable=T_stop)
-Clock3.insert(0,'0')
+Clock3 = Entry(window, textvariable=T_stop)
+Clock3.insert(0, '0')
 Clock3.config(state=DISABLED)
 Clock3.place(x=10, y=470)
 
 Timestop = Label(window, text="Sim Stop time")
 Timestop.place(x=100, y=470)
 
-T_elapse = DoubleVar()
-
-Clock4=Entry(window, textvariable=T_elapse)
-Clock4.insert(0,'0')
+Clock4 = Entry(window, textvariable=T_elapse)
+Clock4.insert(0, '0')
 Clock4.config(state=DISABLED)
 Clock4.place(x=200, y=440)
 
 Timeelapse = Label(window, text="Sim run time")
 Timeelapse.place(x=280, y=440)
 
+Clock5 = Entry(window, textvariable=T_global)
+Clock5.insert(0, '0')
+Clock5.config(state=DISABLED)
+Clock5.place(x=200, y=470)
+
+Globalrun = Label(window, text="Global ref time")
+Globalrun.place(x=280, y=470)
+
+Armed = Label(window, text="")
+Armed.place(x=280, y=340)
+
 
 def Stop():
     running.set(0)
+    Armed.config(text="Sim off", fg='red')
+
 
 def Start_time():
     hour = time.strftime("%I")
     minute = time.strftime("%M")
     second = time.strftime("%S")
-    milliseconds = ((time.time() * 1000))
+    milliseconds = (time.time() * 1000)
     millisecondsint = int(milliseconds)
     hourfloat = float(hour)
     minutefloat = float(minute)
     secondfloat = float(second)
-    milliseconds2 = ((milliseconds) - (millisecondsint))
-    floattime = ((hourfloat * 3600) + (minutefloat * 60) + secondfloat + milliseconds2)
-    T_start.set (floattime)
+    milliseconds2 = milliseconds - millisecondsint
+    floattime = ((hourfloat * 3600) + (minutefloat * 60) + secondfloat + milliseconds2).__round__(3)
+    T_start.set(floattime)
+
 
 def Stop_time():
     hour = time.strftime("%I")
     minute = time.strftime("%M")
     second = time.strftime("%S")
-    milliseconds = ((time.time() * 1000))
+    milliseconds = (time.time() * 1000)
     millisecondsint = int(milliseconds)
     hourfloat = float(hour)
     minutefloat = float(minute)
     secondfloat = float(second)
-    milliseconds2 = ((milliseconds)-(millisecondsint))
-    floattime = ((hourfloat * 3600) + (minutefloat * 60) + secondfloat + milliseconds2)
-    T_stop.set (floattime)
-    Time_elapsed = (( T_stop.get() - T_start.get() ).__round__(3))
-    T_elapse.set(Time_elapsed)
+    milliseconds2 = milliseconds - millisecondsint
+    floattime2 = ((hourfloat * 3600) + (minutefloat * 60) + secondfloat + milliseconds2).__round__(3)
+    T_stop.set(floattime2)
+
 
 def Precharge():
-    running.set(1)
     CompressButton.config(state=NORMAL)
     Start_time()
     while running.get() == 1:
+        Armed.config(text="Sim running", fg='orange')
         coordinates = canvas.coords(Piston)
         if coordinates[0] >= 355:
             Stop()
             Stop_time()
-        canvas.move(Piston,0.1,0)
-        canvas.move(Fluid,0.1,0)
+        canvas.move(Piston, 0.1, 0)
+        canvas.move(Fluid, 0.1, 0)
         window.update()
 
+
 def Compress():
-    running.set(1)
     ExpandButton.config(state=NORMAL)
     Start_time()
-    Timetomove_Compress = (Entry3.get() - Entry4.get()) / Flow1.get()
+    Timetomove_Compress = ((Entry3.get() - Entry4.get()) / Flow1.get() * 60)
+    print(Timetomove_Compress)
     while running.get() == 1:
+        Armed.config(text="Sim running", fg='orange')
         coordinates = canvas.coords(Piston)
         PISTONLIMIT = (Entry4.get() / Entry3.get()) * CanvasWidth
         if coordinates[0] <= PISTONLIMIT:
             Stop()
             Stop_time()
-        canvas.move(Piston,[(Flow1.get()*(-1))/220],0)
-        canvas.move(Fluid,[(Flow1.get()*(-1))/220],0)
+        canvas.move(Piston, [(Flow1.get() * (-1)) / 220], 0)
+        canvas.move(Fluid, [(Flow1.get() * (-1)) / 220], 0)
         window.update()
 
+
 def Discharge():
-    running.set(1)
     Start_time()
-    Timetomove_Expand = (Entry3.get() - Entry4.get()) / Flow2.get()
+    Timetomove_Expand = ((Entry3.get() - Entry4.get()) / Flow2.get() * 60)
+    print(Timetomove_Expand)
     while running.get() == 1:
+        Armed.config(text="Sim running", fg='orange')
         coordinates = canvas.coords(Piston)
         if coordinates[0] >= 355:
             Stop()
             Stop_time()
-        canvas.move(Piston,[Flow2.get()/220],0)
-        canvas.move(Fluid,[Flow2.get()/220],0)
+        canvas.move(Piston, [Flow2.get() / 220], 0)
+        canvas.move(Fluid, [Flow2.get() / 220], 0)
         window.update()
+
+Exit = Button(window, command=exit, text='Shut down')
+Exit.place(x=570, y=470)
+
 
 window.mainloop()
